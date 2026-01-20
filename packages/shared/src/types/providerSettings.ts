@@ -10,7 +10,8 @@ export type ProviderId =
   | 'bedrock'
   | 'ollama'
   | 'openrouter'
-  | 'litellm';
+  | 'litellm'
+  | 'custom';
 
 export type ProviderCategory = 'classic' | 'aws' | 'local' | 'proxy' | 'hybrid';
 
@@ -34,6 +35,7 @@ export const PROVIDER_META: Record<ProviderId, ProviderMeta> = {
   ollama: { id: 'ollama', name: 'Ollama', category: 'local', label: 'Local Models', logoKey: 'olama' },
   openrouter: { id: 'openrouter', name: 'OpenRouter', category: 'proxy', label: 'Service', logoKey: 'open-router', helpUrl: 'https://openrouter.ai/keys' },
   litellm: { id: 'litellm', name: 'LiteLLM', category: 'hybrid', label: 'Service', logoKey: 'liteLLM' },
+  custom: { id: 'custom', name: 'Custom Provider', category: 'hybrid', label: 'Custom API', logoKey: 'custom' },
 };
 
 export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -68,12 +70,21 @@ export interface LiteLLMCredentials {
   keyPrefix?: string;
 }
 
+export interface CustomCredentials {
+  type: 'custom';
+  providerName: string;
+  serverUrl: string;
+  hasApiKey: boolean;
+  keyPrefix?: string;
+}
+
 export type ProviderCredentials =
   | ApiKeyCredentials
   | BedrockProviderCredentials
   | OllamaCredentials
   | OpenRouterCredentials
-  | LiteLLMCredentials;
+  | LiteLLMCredentials
+  | CustomCredentials;
 
 export interface ConnectedProvider {
   providerId: ProviderId;

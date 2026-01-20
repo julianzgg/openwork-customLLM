@@ -264,7 +264,22 @@ interface ZaiProviderConfig {
   models: Record<string, ZaiProviderModelConfig>;
 }
 
-type ProviderConfig = OllamaProviderConfig | BedrockProviderConfig | OpenRouterProviderConfig | LiteLLMProviderConfig | ZaiProviderConfig;
+interface CustomProviderModelConfig {
+  name: string;
+  tools?: boolean;
+}
+
+interface CustomProviderConfig {
+  npm: string;
+  name: string;
+  options: {
+    baseURL: string;
+    apiKey?: string;
+  };
+  models: Record<string, CustomProviderModelConfig>;
+}
+
+type ProviderConfig = OllamaProviderConfig | BedrockProviderConfig | OpenRouterProviderConfig | LiteLLMProviderConfig | ZaiProviderConfig | CustomProviderConfig;
 
 interface OpenCodeConfig {
   $schema?: string;
@@ -324,6 +339,7 @@ export async function generateOpenCodeConfig(): Promise<string> {
     ollama: 'ollama',
     openrouter: 'openrouter',
     litellm: 'litellm',
+    custom: 'custom',
   };
 
   // Build enabled providers list from new settings or fall back to base providers
@@ -501,6 +517,38 @@ export async function generateOpenCodeConfig(): Promise<string> {
         },
       };
       console.log('[OpenCode Config] LiteLLM configured:', litellmProvider.selectedModelId);
+    }
+  }
+
+  // Configure Custom Provider if connected
+  const customProvider = providerSettings.connectedProviders.custom;
+  if (customProvider?.connectionStatus === 'connected' && customProvider.credentials.type === 'custom') {
+    if (customProvider.selectedModelId) {
+      const customCreds = customProvider.credentials;
+      const customOptions: CustomProviderConfig['options'] = {
+        baseURL: customCreds.serverUrl.endsWith('/v1') ? customCreds.serverUrl : `${customCreds.serverUrl}/v1`,
+      };
+
+      // Add API key to options if provided
+      if (customCreds.hasApiKey) {
+        const customApiKey = getApiKey('custom');
+        if (customApiKey) {
+          customOptions.apiKey = customApiKey;
+        }
+      }
+
+      providerConfig.custom = {
+        npm: '@ai-sdk/openai-compatible',
+        name: customCreds.providerName || 'Custom Provider',
+        options: customOptions,
+        models: {
+          [customProvider.selectedModelId]: {
+            name: customProvider.selectedModelId,
+            tools: true,
+          },
+        },
+      };
+      console.log('[OpenCode Config] Custom Provider configured:', customCreds.providerName, customProvider.selectedModelId);
     }
   }
 

@@ -9,6 +9,7 @@ import {
   OllamaProviderForm,
   OpenRouterProviderForm,
   LiteLLMProviderForm,
+  CustomProviderForm,
 } from './providers';
 import { settingsVariants, settingsTransitions } from '@/lib/animations';
 
@@ -33,6 +34,32 @@ export function ProviderSettingsPanel({
 
   // Render form content based on provider category
   const renderForm = () => {
+    // Handle hybrid category providers individually
+    if (meta.category === 'hybrid') {
+      if (providerId === 'litellm') {
+        return (
+          <LiteLLMProviderForm
+            connectedProvider={connectedProvider}
+            onConnect={onConnect}
+            onDisconnect={onDisconnect}
+            onModelChange={onModelChange}
+            showModelError={showModelError}
+          />
+        );
+      }
+      if (providerId === 'custom') {
+        return (
+          <CustomProviderForm
+            connectedProvider={connectedProvider}
+            onConnect={onConnect}
+            onDisconnect={onDisconnect}
+            onModelChange={onModelChange}
+            showModelError={showModelError}
+          />
+        );
+      }
+    }
+
     switch (meta.category) {
       case 'classic':
         return (
@@ -71,17 +98,6 @@ export function ProviderSettingsPanel({
       case 'proxy':
         return (
           <OpenRouterProviderForm
-            connectedProvider={connectedProvider}
-            onConnect={onConnect}
-            onDisconnect={onDisconnect}
-            onModelChange={onModelChange}
-            showModelError={showModelError}
-          />
-        );
-
-      case 'hybrid':
-        return (
-          <LiteLLMProviderForm
             connectedProvider={connectedProvider}
             onConnect={onConnect}
             onDisconnect={onDisconnect}
