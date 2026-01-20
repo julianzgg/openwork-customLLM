@@ -147,8 +147,8 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "accomplish-ai",
-      "repo": "openwork"
+      "owner": "julianzgg",
+      "repo": "openwork-customLLM"
     },
     "mac": {
       "category": "public.app-category.productivity",
